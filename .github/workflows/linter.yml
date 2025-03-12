@@ -29,7 +29,7 @@ jobs:
         id: setup-pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ^9
+          version: ^10
 
       - name: Setup Node.js
         id: setup-node
@@ -44,14 +44,17 @@ jobs:
 
       - name: Lint Codebase
         id: super-linter
-        uses: super-linter/super-linter/slim@v7.2.1
+        uses: super-linter/super-linter/slim@v7.3.0
         env:
           DEFAULT_BRANCH: develop
           FILTER_REGEX_EXCLUDE: dist/**/*
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TYPESCRIPT_DEFAULT_STYLE: prettier
+          # enabled
           VALIDATE_ALL_CODEBASE: true
+          # disabled
           VALIDATE_JAVASCRIPT_STANDARD: false
           VALIDATE_TYPESCRIPT_STANDARD: false
           VALIDATE_JSCPD: false
-          VALIDATE_BASH_EXEC: false
+          # disable temp (remove if eslint up 8 to 9)
+          VALIDATE_JSON: false
+          VALIDATE_TYPESCRIPT_ES: false
