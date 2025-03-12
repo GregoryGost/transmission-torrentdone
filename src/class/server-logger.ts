@@ -1,4 +1,4 @@
-import * as log4js from 'log4js';
+import log4js from 'log4js';
 import type { Logger } from 'log4js';
 //
 import { Config } from './config';
