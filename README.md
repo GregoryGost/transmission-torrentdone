@@ -165,9 +165,9 @@ Fatal error in , line 0
 Check failed: 12 == (*__errno_location ()).
 ```
 
-Это происходит из-за параметра `MemoryDenyWriteExecute` который появился в systemd с Debian 13
-Поэтому нужно в файле `nano /etc/systemd/system/transmission-daemon.service.d/override.conf` в блоке `[Service]`
-выставить `MemoryDenyWriteExecute=no`
+Это происходит из-за параметра `MemoryDenyWriteExecute` который появился в systemd с Debian 13 Поэтому нужно в файле
+`nano /etc/systemd/system/transmission-daemon.service.d/override.conf` в блоке `[Service]` выставить
+`MemoryDenyWriteExecute=no`
 
 ### Конфигурирование скрипта
 
