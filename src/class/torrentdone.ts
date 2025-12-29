@@ -103,6 +103,13 @@ class Torrentdone {
    */
   readonly TR_TORRENT_TRACKERS: string | undefined;
   /**
+   * ONLY FOR TRANSMISSION >= 4.1.0
+   * * Doc: https://github.com/transmission/transmission/blob/4.1.0-beta.2/docs/Scripts.md
+   * The priority of the torrent (Low is "-1", Normal is "0", High is "1")
+   * Example: `1`
+   */
+  readonly TR_TORRENT_PRIORITY: number | undefined;
+  /**
    * Directory flag for move or copy files.
    * If directory, moving file does not work. Need usage only copy.
    */
@@ -143,6 +150,7 @@ class Torrentdone {
     this.TR_TORRENT_LABELS = this.config.trTorrentLabels;
     this.TR_TORRENT_BYTES_DOWNLOADED = this.config.trTorrentBytesDownloaded;
     this.TR_TORRENT_TRACKERS = this.config.trTorrentTrackers;
+    this.TR_TORRENT_PRIORITY = this.config.trTorrentPriority;
     this.DIR_FLAG = false;
     this.DIR_NAME = undefined;
     this.RELEASER = undefined;
