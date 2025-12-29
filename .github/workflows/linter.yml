@@ -44,17 +44,22 @@ jobs:
 
       - name: Lint Codebase
         id: super-linter
-        uses: super-linter/super-linter/slim@v7.4.0
+        uses: super-linter/super-linter/slim@v8.3.2
         env:
           DEFAULT_BRANCH: develop
-          FILTER_REGEX_EXCLUDE: dist/**/*
+          FILTER_REGEX_EXCLUDE: (dist|__tests__)
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # enabled
+          # migration from 7.4.0 to 8
+          # https://github.com/super-linter/super-linter/blob/d5b0a2ab116623730dd094f15ddc1b6b25bf7b99/docs/upgrade-guide.md?plain=1#L42
+          # enabled all
           VALIDATE_ALL_CODEBASE: true
-          # disabled
-          VALIDATE_JAVASCRIPT_STANDARD: false
-          VALIDATE_TYPESCRIPT_STANDARD: false
+          # disabled not needed
           VALIDATE_JSCPD: false
-          # disable temp (remove if eslint up 8 to 9)
-          VALIDATE_JSON: false
-          VALIDATE_TYPESCRIPT_ES: false
+          VALIDATE_BIOME_FORMAT: false
+          VALIDATE_BIOME_LINT: false
+          VALIDATE_GITHUB_ACTIONS_ZIZMOR: false
+          # for eslint 9 (flat config)
+          TYPESCRIPT_ES_CONFIG_FILE: eslint.config.mjs
+          # if error - OK exit
+          DISABLE_ERRORS: true
+          LOG_LEVEL: INFO
