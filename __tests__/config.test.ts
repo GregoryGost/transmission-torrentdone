@@ -2,7 +2,7 @@
 /**
  * Unit tests for src/class/config.ts
  */
-import { cwd } from 'node:process';
+import { cwd, env } from 'node:process';
 import { normalize, join } from 'node:path';
 //
 import { Config } from '../src/class/config';
@@ -64,7 +64,7 @@ describe('config.ts', () => {
   /**
    * Get all parameters test
    */
-  it('get base parameters', async () => {
+  it('get base parameters for 3.00 version', async () => {
     const testRootPath: string = normalize(join(cwd(), '__tests__', 'configs'));
     const config: Config = new Config(testRootPath);
     //
@@ -86,8 +86,40 @@ describe('config.ts', () => {
     expect(config.trTorrentHash).toBe('9ef9e27600d656140ba016aa81460fe2e518cbda');
     expect(config.trTimeLocaltime).toBe('Sun Nov  6 04:31:04 2022');
     expect(config.trTorrentLabels).toBe('');
-    expect(config.trTorrentBytesDownloaded).toBe(NaN);
+    // for 3.00 version
+    expect(config.trTorrentBytesDownloaded).toBe(undefined);
     expect(config.trTorrentTrackers).toBe(undefined);
+    expect(config.trTorrentPriority).toBe(undefined);
+  });
+  it('get base parameters for >= 4.0.0 version', async () => {
+    env.TR_TORRENT_BYTES_DOWNLOADED = '100';
+    env.TR_TORRENT_TRACKERS = 'https://foo.com';
+    env.TR_TORRENT_PRIORITY = '1';
+    const testRootPath: string = normalize(join(cwd(), '__tests__', 'configs'));
+    const config: Config = new Config(testRootPath);
+    //
+    expect(config.rootPath).toBe(testRootPath);
+    expect(config.devmode).toBe(true);
+    expect(config.logLevel).toBe('trace');
+    expect(config.dateFormat).toBe('dd.MM.yyyy_hh:mm:ss.SSS');
+    //
+    expect(config.ipAddress).toBe('127.0.0.1');
+    expect(config.port).toBe(9091);
+    expect(config.allowedMediaExtensions).toStrictEqual(/.(mkv|mp4|avi)/i);
+    expect(config.mediaPath).toBe(normalize(join(cwd(), '/__tests__/configs/mnt/data/media')));
+    expect(config.serialsRootDir).toBe('TV Shows');
+    expect(config.filmsRootDir).toBe('Movies');
+    //
+    expect(config.trTorrentId).toBe(200);
+    expect(config.trTorrentName).toBe('Some file name');
+    expect(config.trTorrentDir).toBe('/mnt/data/download');
+    expect(config.trTorrentHash).toBe('9ef9e27600d656140ba016aa81460fe2e518cbda');
+    expect(config.trTimeLocaltime).toBe('Sun Nov  6 04:31:04 2022');
+    expect(config.trTorrentLabels).toBe('');
+    // for >= 4.0.0 version
+    expect(config.trTorrentBytesDownloaded).toBe(100);
+    expect(config.trTorrentTrackers).toBe('https://foo.com');
+    expect(config.trTorrentPriority).toBe(1);
   });
   it('get once allowedMediaExtensions', async () => {
     const testRootPath: string = normalize(join(cwd(), '__tests__', 'configs', 'once_ext'));

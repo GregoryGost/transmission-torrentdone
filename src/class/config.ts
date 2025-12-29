@@ -1,7 +1,6 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, normalize, join } from 'node:path';
 import { existsSync } from 'node:fs';
-import { cpus } from 'node:os';
 import nconf from 'nconf';
 
 /**
@@ -119,19 +118,25 @@ class Config {
    * Number of bytes that were downloaded for this torrent.
    * Example: `123456789` ???
    */
-  private readonly _trTorrentBytesDownloaded: number;
+  private readonly _trTorrentBytesDownloaded?: number;
   /**
-   * ONLY FOR TRANSMISSION >= 4.0.0.
+   * ONLY FOR TRANSMISSION >= 4.0.0
    * * Doc: https://github.com/transmission/transmission/blob/4.0.6/docs/Scripts.md
    * A comma-delimited list of the torrent's trackers' announce URLs.
    * Example: `https://foo.com,https://bar.org,https://baz.com` ???
    */
-  private readonly _trTorrentTrackers: string;
+  private readonly _trTorrentTrackers?: string;
+  /**
+   * ONLY FOR TRANSMISSION >= 4.1.0
+   * * Doc: https://github.com/transmission/transmission/blob/4.1.0-beta.2/docs/Scripts.md
+   * The priority of the torrent (Low is "-1", Normal is "0", High is "1")
+   * Example: `1`
+   */
+  private readonly _trTorrentPriority?: number;
 
   private _maxWhileCount = 10;
 
   constructor(root_path?: string) {
-    process.env.UV_THREADPOOL_SIZE = cpus().length.toString();
     //
     this._rootPath = root_path ?? Config.getRootDir(this.maxWhileCount);
     this.init();
@@ -156,8 +161,14 @@ class Config {
     this._trTorrentHash = this.getParam('TR_TORRENT_HASH');
     this._trTimeLocaltime = this.getParam('TR_TIME_LOCALTIME');
     this._trTorrentLabels = this.getParam('TR_TORRENT_LABELS');
-    this._trTorrentBytesDownloaded = Number(this.getParam('TR_TORRENT_BYTES_DOWNLOADED'));
-    this._trTorrentTrackers = this.getParam('TR_TORRENT_TRACKERS');
+    // start with transmission >= 4.0.0
+    this._trTorrentBytesDownloaded = this.getUndefinedParam('TR_TORRENT_BYTES_DOWNLOADED')
+      ? Number(this.getUndefinedParam('TR_TORRENT_BYTES_DOWNLOADED'))
+      : undefined;
+    this._trTorrentTrackers = this.getUndefinedParam('TR_TORRENT_TRACKERS');
+    this._trTorrentPriority = this.getUndefinedParam('TR_TORRENT_PRIORITY')
+      ? Number(this.getUndefinedParam('TR_TORRENT_PRIORITY'))
+      : undefined;
   }
 
   get rootPath(): string {
@@ -240,12 +251,16 @@ class Config {
     return this._trTorrentLabels;
   }
 
-  get trTorrentBytesDownloaded(): number {
+  get trTorrentBytesDownloaded(): number | undefined {
     return this._trTorrentBytesDownloaded;
   }
 
-  get trTorrentTrackers(): string {
+  get trTorrentTrackers(): string | undefined {
     return this._trTorrentTrackers;
+  }
+
+  get trTorrentPriority(): number | undefined {
+    return this._trTorrentPriority;
   }
 
   get maxWhileCount(): number {
@@ -277,7 +292,7 @@ class Config {
    * Check login or password not found.
    * Check transmission-daemon variables/parameters for start work
    * variables pass to Environment
-   * transmission-daemon passes 7 variables to script / 9 for transmission-daemon 4.X.X
+   * transmission-daemon passes 7 variables to script / 10 for transmission-daemon 4.X.X
    * [More info](* Doc: https://github.com/transmission/transmission/blob/4.0.6/docs/Scripts.md)
    *
    * ```sh
@@ -289,7 +304,7 @@ class Config {
    * TR_TORRENT_NAME: 'Some file name',
    * TR_TORRENT_LABELS: ''
    * ```
-   * New for transmission 4.0 `TR_TORRENT_BYTES_DOWNLOADED` and `TR_TORRENT_TRACKERS`
+   * New for transmission 4.1 `TR_TORRENT_BYTES_DOWNLOADED` and `TR_TORRENT_TRACKERS` and `TR_TORRENT_PRIORITY`
    *
    * ```sh
    * TR_APP_VERSION: '4.0.0',
@@ -300,6 +315,7 @@ class Config {
    * TR_TORRENT_ID: '3',
    * TR_TORRENT_LABELS: '',
    * TR_TORRENT_NAME: 'Some file name',
+   * TR_TORRENT_PRIORITY: '0',
    * TR_TORRENT_TRACKERS: ''
    * ```
    *
@@ -358,6 +374,22 @@ class Config {
     // Else not found from config file, get from Environment (uppercase).
     // Example: LOGIN | LOG_LEVEL
     if (param === undefined) param = this.nconf.get(param_name.toUpperCase());
+    return param;
+  }
+
+  /**
+   * Get param value
+   * @param {string} param_name - parameter name
+   * @returns {string | undefined} parameter value
+   */
+  private getUndefinedParam(param_name: string): string | undefined {
+    // From config file. Example: login | log_level
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let param: any = this.nconf.get(param_name);
+    // Else not found from config file, get from Environment (uppercase).
+    // Example: LOGIN | LOG_LEVEL
+    if (param === undefined || param === '') param = this.nconf.get(param_name.toUpperCase());
+    if (param !== undefined) return String(param);
     return param;
   }
 
