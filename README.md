@@ -51,8 +51,14 @@
 "umask": 0,
 ```
 
+В 4 версии transmission-daemon файл конфигурации изменил свое расположение. Если запускать systemd от пользователя root
+через override.conf скрипт, то файл конфигурации будет расположен по пути
+`/root/.config/transmission-daemon/settings.json` Обратите внимание, что с 4 версии меняется формат указания некоторых
+параметров с `kebab-case` (дефис) на `snake_case` (нижнее подчеркивание)
+
 История версий:
 
+- v3.3.0 - (28.12.2025) - Улучшена совместимость между 3.00 и 4.x.x версиями transmission-daemon.
 - v3.2.0 - (26.11.2024) - Исправена проблема обхода торрента директории с вложенными директориями.
 - v3.1.2 - (30.09.2024) - Улучшены тесты. Поправлены обработки релизеров по итогам тестов. Мелкие исправления.
   Обновление библиотек.
@@ -103,43 +109,65 @@
 - TR_TIME_LOCALTIME: дата и время запуска скрипта
 - TR_TORRENT_LABELS: тэги/метки присвоенные торренту
 
-Начиная с версии 4.0.0 добавляются еще две
+Начиная с версии 4.0.0 добавляются еще три
 
 - TR_TORRENT_BYTES_DOWNLOADED: размер загруженных данных в байтах
 - TR_TORRENT_TRACKERS: список URL анонсированных трекеров
+- TR_TORRENT_PRIORITY: приоритет торрента
 
 ## Установка скрипта
 
 Нужно поставить **Node.js**, скачать исполняемый файл скрипта и создать для него конфигурацию.
 
+НЕ обязательно клонировать весь Git проект !!!
+
 Команды для Proxmox LXC Debian под root:
 
-```shell
+```sh
 apt update && apt upgrade -y && apt install -y curl wget
 ```
 
 Ставим **Node.js**  
-Пойти в <https://github.com/nodesource/distributions/blob/master/README.md>  
-Выбрать LTS версию
+Пойти в <https://nodejs.org/en/download>  
+Выбрать LTS версию, которую поддерживает текущий скрипт (указано в `package.json` в блоке `engines`)
 
-```shell
-curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh
-bash nodesource_setup.sh
-apt update && apt install -y nodejs
+```sh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+\. "$HOME/.nvm/nvm.sh"
+nvm install 20
 node -v
-v20.17.0
+v20.19.6
 ```
 
-Далее создаем папку под приложение, делаем файл исполняемым. Создаем фейковый файл `package.json` (нужно для корректного
-определения корневой дирректории и нахождения файла конфигурации)
+Если нужен pnpm
+
+```sh
+corepack enable pnpm
+pnpm -v
+```
+
+Далее создаем папку под приложение, скачиваем два файла `index.js` и `package.json`. Делаем файл `index.js` исполняемым.
 
 ```shell
 mkdir /opt/torrentdone
 cd /opt/torrentdone
-wget https://raw.githubusercontent.com/GregoryGost/transmission-torrentdone/refs/heads/main/dist/index.js
+wget -O index.js https://raw.githubusercontent.com/GregoryGost/transmission-torrentdone/refs/heads/main/dist/index.js
+wget -O package.json https://raw.githubusercontent.com/GregoryGost/transmission-torrentdone/refs/heads/main/package.json
 chmod +x index.js
-echo '{"version":"3.1.1"}' > package.json
 ```
+
+### Особенности Debian 13 (trixie)
+
+Когда Transmission-daemon вызывает скрипт он может выдать ошибку с доступом к памяти.
+
+```sh
+Fatal error in , line 0
+Check failed: 12 == (*__errno_location ()).
+```
+
+Это происходит из-за параметра `MemoryDenyWriteExecute` который появился в systemd с Debian 13 Поэтому нужно в файле
+`nano /etc/systemd/system/transmission-daemon.service.d/override.conf` в блоке `[Service]` выставить
+`MemoryDenyWriteExecute=no`
 
 ### Конфигурирование скрипта
 
@@ -192,21 +220,21 @@ chown -R debian-transmission:debian-transmission /opt/torrentdone
 обновление на 20 LTS версию.
 
 ```shell
-curl -fsSL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh
-bash nodesource_setup.sh
-apt update && apt upgrade -y
+nvm install 24
 ```
 
-Для обновления можно просто перекачать `index.js` файл
+Для обновления можно просто перекачать файлы `index.js` и `package.json`
 
 ```shell
 wget -O index.js https://raw.githubusercontent.com/GregoryGost/transmission-torrentdone/refs/heads/main/dist/index.js
+wget -O package.json https://raw.githubusercontent.com/GregoryGost/transmission-torrentdone/refs/heads/main/package.json
 ```
 
-Если вы хотите обновить из другой ветки, просто поменяйте её название в пути скачивания
+Если вы хотите обновить из другой ветки, просто поменяйте её название в пути скачивания. Пример для `develop` ветки.
 
 ```shell
 wget -O index.js https://raw.githubusercontent.com/GregoryGost/transmission-torrentdone/refs/heads/develop/dist/index.js
+wget -O package.json https://raw.githubusercontent.com/GregoryGost/transmission-torrentdone/refs/heads/develop/package.json
 ```
 
 ## Алгоритм обработки торрентов

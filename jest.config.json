@@ -7,7 +7,12 @@
   "testMatch": ["**/*.test.ts"],
   "testPathIgnorePatterns": ["/node_modules/", "/dist/"],
   "transform": {
-    "^.+\\.ts$": "ts-jest"
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "tsconfig": "tsconfig.jest.json"
+      }
+    ]
   },
   "coverageReporters": ["json-summary", "text", "lcov"],
   "collectCoverage": true,

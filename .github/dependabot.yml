@@ -11,6 +11,9 @@ updates:
       - actions
     reviewers:
       - GregoryGost
+    ignore:
+      - dependency-name: 'typescript'
+        versions: ['>=5.8.0']
     groups:
       actions-minor:
         update-types:
@@ -29,6 +32,9 @@ updates:
       - dependencies
     reviewers:
       - GregoryGost
+    ignore:
+      - dependency-name: 'typescript'
+        versions: ['>=5.8.0']
     groups:
       development:
         dependency-type: development

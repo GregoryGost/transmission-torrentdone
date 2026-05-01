@@ -18,7 +18,7 @@ const testRootConfigsPath: string = normalize(join(cwd(), '__tests__', 'configs'
 const logFilePath = './logs/torrentdone.log';
 const testMntDataPath = normalize(`${testRoot}/__tests__/configs/mnt/data`);
 const testMntDownloadsPath = normalize(`${testRoot}/__tests__/mnt/downloads`);
-const version = '3.00';
+let version = '3.00';
 // const configFile: string = normalize(`${testRoot}/__tests__/configs/test.json`);
 
 // Mock logger
@@ -39,7 +39,7 @@ describe('torrentdone.ts - Main tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Torrentdone class instance and init params', () => {
+  it('Torrentdone class instance and init params for version 3.00', () => {
     // Set variables like transmission does
     env.TR_APP_VERSION = version;
     env.TR_TORRENT_ID = '555';
@@ -48,8 +48,9 @@ describe('torrentdone.ts - Main tests', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355da';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
+    // env.TR_TORRENT_BYTES_DOWNLOADED = '';
+    // env.TR_TORRENT_TRACKERS = '';
+    // env.TR_TORRENT_PRIORITY = '';
     // Create Torrentdone class instance
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     expect(torrentdone).toBeInstanceOf(Torrentdone);
@@ -67,10 +68,55 @@ describe('torrentdone.ts - Main tests', () => {
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 17:22:09 2022');
     expect(typeof torrentdone.TR_TORRENT_LABELS).toEqual('string');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
+    // for >= 4.0.0 version is undefined for 3.00
+    expect(typeof torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual('undefined');
+    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(undefined);
+    expect(typeof torrentdone.TR_TORRENT_TRACKERS).toEqual('undefined');
+    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual(undefined);
+    expect(typeof torrentdone.TR_TORRENT_PRIORITY).toEqual('undefined');
+    expect(torrentdone.TR_TORRENT_PRIORITY).toEqual(undefined);
+  });
+  it('Torrentdone class instance and init params for >= 4.0.0 version', () => {
+    version = '4.0.0';
+    // Set variables like transmission does
+    env.TR_APP_VERSION = version;
+    env.TR_TORRENT_ID = '555';
+    env.TR_TORRENT_NAME = 'INSTANCE_TEST.mp4';
+    env.TR_TORRENT_DIR = '/mnt/media/download/';
+    env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355da';
+    env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2022';
+    env.TR_TORRENT_LABELS = '';
+    env.TR_TORRENT_BYTES_DOWNLOADED = '111';
+    env.TR_TORRENT_TRACKERS = 'https://bar.com';
+    env.TR_TORRENT_PRIORITY = '1';
+    // Create Torrentdone class instance
+    const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
+    expect(torrentdone).toBeInstanceOf(Torrentdone);
+    expect(typeof torrentdone.TR_APP_VERSION).toEqual('string');
+    expect(torrentdone.TR_APP_VERSION).toEqual(version);
+    expect(typeof torrentdone.TR_TORRENT_ID).toEqual('number');
+    expect(torrentdone.TR_TORRENT_ID).toEqual(555);
+    expect(typeof torrentdone.TR_TORRENT_NAME).toEqual('string');
+    expect(torrentdone.TR_TORRENT_NAME).toEqual('INSTANCE_TEST.mp4');
+    expect(typeof torrentdone.TR_TORRENT_DIR).toEqual('string');
+    expect(torrentdone.TR_TORRENT_DIR).toEqual('/mnt/media/download/');
+    expect(typeof torrentdone.TR_TORRENT_HASH).toEqual('string');
+    expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e321e54293b19b858db355da');
+    expect(typeof torrentdone.TR_TIME_LOCALTIME).toEqual('string');
+    expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 17:22:09 2022');
+    expect(typeof torrentdone.TR_TORRENT_LABELS).toEqual('string');
+    expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
+    // for >= 4.0.0 version is undefined for 3.00
     expect(typeof torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual('number');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
+    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(111);
     expect(typeof torrentdone.TR_TORRENT_TRACKERS).toEqual('string');
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
+    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('https://bar.com');
+    expect(typeof torrentdone.TR_TORRENT_PRIORITY).toEqual('number');
+    expect(torrentdone.TR_TORRENT_PRIORITY).toEqual(1);
+    version = '3.00';
+    env.TR_TORRENT_BYTES_DOWNLOADED = undefined;
+    env.TR_TORRENT_TRACKERS = undefined;
+    env.TR_TORRENT_PRIORITY = undefined;
   });
 });
 
@@ -91,8 +137,6 @@ describe('torrentdone.ts - Serials single files', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355da';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -130,8 +174,6 @@ describe('torrentdone.ts - Serials single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e321e54293b19b858db355da');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 17:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     // Run process
     await torrentdone.main();
     // log Info
@@ -205,8 +247,6 @@ describe('torrentdone.ts - Serials single files', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355db';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 18:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -242,8 +282,6 @@ describe('torrentdone.ts - Serials single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e321e54293b19b858db355db');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 18:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     // log Info
@@ -260,8 +298,6 @@ describe('torrentdone.ts - Serials single files', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355dc';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 19:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -299,8 +335,6 @@ describe('torrentdone.ts - Serials single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e321e54293b19b858db355dc');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 19:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     // log Info
@@ -317,8 +351,6 @@ describe('torrentdone.ts - Serials single files', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355dd';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 20:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -354,8 +386,6 @@ describe('torrentdone.ts - Serials single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e321e54293b19b858db355dd');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 20:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     // log Info
@@ -372,8 +402,6 @@ describe('torrentdone.ts - Serials single files', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355de';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 21:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -409,8 +437,6 @@ describe('torrentdone.ts - Serials single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e321e54293b19b858db355de');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 21:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     // log Info
@@ -427,8 +453,6 @@ describe('torrentdone.ts - Serials single files', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e485e54293b19b858db355de';
     env.TR_TIME_LOCALTIME = 'Sat Sep  4 21:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -466,8 +490,6 @@ describe('torrentdone.ts - Serials single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e485e54293b19b858db355de');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Sat Sep  4 21:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     // log Info
@@ -484,8 +506,6 @@ describe('torrentdone.ts - Serials single files', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e485e54293b19b858db355de';
     env.TR_TIME_LOCALTIME = 'Sat Sep  4 21:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -521,15 +541,13 @@ describe('torrentdone.ts - Serials single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e485e54293b19b858db355de');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Sat Sep  4 21:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     // log Info
     expect(logInfoMock).toHaveBeenNthCalledWith(3, `TORRENT ID: "130" FINISH: START PROCESS ...`);
     // File "${file_name}" is not Serial or Film. NO ACTION
     expect(logInfoMock).toHaveBeenNthCalledWith(
-      14,
+      15,
       `File "The Penguin S01.rus.LostFilm.TV.mkv" is not Lostfilm Serial or Lostfilm Film. NO ACTION`
     );
     // log Error
@@ -550,8 +568,6 @@ describe('torrentdone.ts - Serials files in directory', () => {
     env.TR_TORRENT_HASH = '65b9eea6e1cc6bb9f0cd2a47751a186f';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -579,8 +595,6 @@ describe('torrentdone.ts - Serials files in directory', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('65b9eea6e1cc6bb9f0cd2a47751a186f');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 17:22:09 2024');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     //
@@ -607,8 +621,6 @@ describe('torrentdone.ts - Serials files in directory', () => {
     env.TR_TORRENT_HASH = 'f0935e4cd5920aa6c7c996a5ee53a70f';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 18:22:09 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -636,8 +648,6 @@ describe('torrentdone.ts - Serials files in directory', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('f0935e4cd5920aa6c7c996a5ee53a70f');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  4 18:22:09 2024');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     //
@@ -679,8 +689,6 @@ describe('torrentdone.ts - Serials files in directory', () => {
     env.TR_TORRENT_HASH = 'fc14ec2e2a40dbf7e2b4a87aa4f19cc4427a1ee1';
     env.TR_TIME_LOCALTIME = 'Mon Nov 25 21:25:43 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -708,34 +716,32 @@ describe('torrentdone.ts - Serials files in directory', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('fc14ec2e2a40dbf7e2b4a87aa4f19cc4427a1ee1');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Mon Nov 25 21:25:43 2024');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     // log Info
     expect(logInfoMock).toHaveBeenNthCalledWith(7, `NAME:  "Менталист"`);
-    expect(logInfoMock).toHaveBeenNthCalledWith(15, `Element: "The.Mentalist.s01e01.BDRip.720p.Rus.Eng.mkv" is a FILE`);
+    expect(logInfoMock).toHaveBeenNthCalledWith(16, `Element: "The.Mentalist.s01e01.BDRip.720p.Rus.Eng.mkv" is a FILE`);
     expect(logInfoMock).toHaveBeenNthCalledWith(
-      18,
+      19,
       `File "The.Mentalist.s01e01.BDRip.720p.Rus.Eng.mkv" copied successfully. => END`
     );
     expect(logInfoMock).toHaveBeenNthCalledWith(
-      23,
+      24,
       `File "The.Mentalist.s01e02.BDRip.720p.Rus.Eng.mkv" copied successfully. => END`
     );
     expect(logInfoMock).toHaveBeenNthCalledWith(
-      28,
+      29,
       `File "The.Mentalist.s02e03.WEB-DL.720p.Rus.Eng.mkv" copied successfully. => END`
     );
     expect(logInfoMock).toHaveBeenNthCalledWith(
-      33,
+      34,
       `File "The.Mentalist.s02e04.WEB-DL.720p.Rus.Eng.mkv" copied successfully. => END`
     );
     expect(logInfoMock).toHaveBeenNthCalledWith(
-      38,
+      39,
       `File "The.Mentalist.s02e05.WEB-DL.720p.Rus.Eng.mkv" copied successfully. => END`
     );
-    expect(logInfoMock).toHaveBeenNthCalledWith(40, `TORRENT ID: "110" END PROCESS`);
+    expect(logInfoMock).toHaveBeenNthCalledWith(41, `TORRENT ID: "110" END PROCESS`);
     // log Debug
     expect(logDebugMock).toHaveBeenNthCalledWith(1, `DIR_FLAG: "true"`);
     expect(logDebugMock).toHaveBeenNthCalledWith(
@@ -781,8 +787,6 @@ describe('torrentdone.ts - Films single files', () => {
     env.TR_TORRENT_HASH = '524e05dc77239f3a15dab766aaa59a9e432efde7';
     env.TR_TIME_LOCALTIME = 'Fri Nov  7 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -818,8 +822,6 @@ describe('torrentdone.ts - Films single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('524e05dc77239f3a15dab766aaa59a9e432efde7');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  7 17:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     // Run process
     await torrentdone.main();
     // log Info
@@ -836,8 +838,6 @@ describe('torrentdone.ts - Films single files', () => {
     env.TR_TORRENT_HASH = '17503a6b2326f09fbc4e3a7c03874c7333002038';
     env.TR_TIME_LOCALTIME = 'Fri Nov  8 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -873,8 +873,6 @@ describe('torrentdone.ts - Films single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('17503a6b2326f09fbc4e3a7c03874c7333002038');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  8 17:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     // Run process
     await torrentdone.main();
     // log Info
@@ -891,8 +889,6 @@ describe('torrentdone.ts - Films single files', () => {
     env.TR_TORRENT_HASH = 'a1422e6a168630cdd214ac5e31ca01ae1bee8d92';
     env.TR_TIME_LOCALTIME = 'Fri Nov  9 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -930,8 +926,6 @@ describe('torrentdone.ts - Films single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('a1422e6a168630cdd214ac5e31ca01ae1bee8d92');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  9 17:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     // Run process
     await torrentdone.main();
     // log Info
@@ -948,8 +942,6 @@ describe('torrentdone.ts - Films single files', () => {
     env.TR_TORRENT_HASH = '5e796e48332af4142b10ca0f86e65d9bfdb05884';
     env.TR_TIME_LOCALTIME = 'Fri Nov  10 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -987,8 +979,6 @@ describe('torrentdone.ts - Films single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('5e796e48332af4142b10ca0f86e65d9bfdb05884');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  10 17:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     // Run process
     await torrentdone.main();
     // log Info
@@ -1005,8 +995,6 @@ describe('torrentdone.ts - Films single files', () => {
     env.TR_TORRENT_HASH = 'e993215bfdbb515f6ea00fafc1918z549119f789';
     env.TR_TIME_LOCALTIME = 'Fri Nov  13 17:22:09 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1042,17 +1030,15 @@ describe('torrentdone.ts - Films single files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('e993215bfdbb515f6ea00fafc1918z549119f789');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  13 17:22:09 2024');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     // Run process
     await torrentdone.main();
     // log Debug
     expect(logDebugMock).toHaveBeenNthCalledWith(5, `RELEASER: novafilm`);
     expect(logDebugMock).toHaveBeenNthCalledWith(6, `Check Serial or Film: "Simple_Media_file (2009).novafilm.tv.avi"`);
     // log Info
-    expect(logInfoMock).toHaveBeenNthCalledWith(14, `File "Simple_Media_file (2009).novafilm.tv.avi" is a FILM`);
+    expect(logInfoMock).toHaveBeenNthCalledWith(15, `File "Simple_Media_file (2009).novafilm.tv.avi" is a FILM`);
     expect(logInfoMock).toHaveBeenNthCalledWith(
-      16,
+      17,
       `File "Simple_Media_file (2009).novafilm.tv.avi" moving successfully. => END`
     );
     // log Error
@@ -1073,8 +1059,6 @@ describe('torrentdone.ts - Films files in directory', () => {
     env.TR_TORRENT_HASH = '6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2';
     env.TR_TIME_LOCALTIME = 'Fri Nov  11 17:22:09 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1102,8 +1086,6 @@ describe('torrentdone.ts - Films files in directory', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('6216f8a75fd5bb3d5f22b6f9958cdede3fc086c2');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  11 17:22:09 2024');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     //
@@ -1142,8 +1124,6 @@ describe('torrentdone.ts - Films files in directory', () => {
     env.TR_TORRENT_HASH = '601ca99d55f00a2e8e736676b606a4d31d374fdd';
     env.TR_TIME_LOCALTIME = 'Fri Nov  12 17:22:09 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1171,8 +1151,6 @@ describe('torrentdone.ts - Films files in directory', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('601ca99d55f00a2e8e736676b606a4d31d374fdd');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  12 17:22:09 2024');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     //
@@ -1221,8 +1199,6 @@ describe('torrentdone.ts - Simple files', () => {
     env.TR_TORRENT_HASH = 'e993215bfdaa515f6ea00fafc1918f549119f993';
     env.TR_TIME_LOCALTIME = 'Fri Nov  13 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1250,15 +1226,13 @@ describe('torrentdone.ts - Simple files', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('e993215bfdaa515f6ea00fafc1918f549119f993');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Fri Nov  13 17:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     // Run process
     await torrentdone.main();
     // log Debug
     expect(logDebugMock).toHaveBeenNthCalledWith(6, `Base processing`);
     // log Info
-    expect(logInfoMock).toHaveBeenNthCalledWith(13, `File "Simple_Media_file.mkv" is not Serial or Film. NO ACTION`);
-    expect(logInfoMock).toHaveBeenNthCalledWith(15, `TORRENT ID: "113" END PROCESS`);
+    expect(logInfoMock).toHaveBeenNthCalledWith(14, `File "Simple_Media_file.mkv" is not Serial or Film. NO ACTION`);
+    expect(logInfoMock).toHaveBeenNthCalledWith(16, `TORRENT ID: "113" END PROCESS`);
     // log Error
     expect(logErrorMock).not.toHaveBeenCalled();
   });
@@ -1292,8 +1266,6 @@ describe('torrentdone.ts - isFileOrDirectoryOrUnknown method', () => {
     env.TR_TORRENT_HASH = 'e993215bfdaa515f6ea00fafc1918f549119f993';
     env.TR_TIME_LOCALTIME = 'Fri Nov  13 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1336,8 +1308,6 @@ describe('torrentdone.ts - isFileOrDirectoryOrUnknown method', () => {
     env.TR_TORRENT_HASH = 'e993215bfdaa515f6ea00fafc1918f549119f993';
     env.TR_TIME_LOCALTIME = 'Fri Nov  13 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1389,8 +1359,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355da';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1421,8 +1389,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '65b9eea6e1cc6bb9f0cd2a47751a186f';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1453,8 +1419,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355da';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1493,8 +1457,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e321e54293b19b858db355da';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1542,8 +1504,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '65b9eea6e1cc6bb9f0cd2a47751a186f';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1573,8 +1533,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '65b9eea6e1cc6bb9f0cd2a47751a186f';
     env.TR_TIME_LOCALTIME = 'Fri Nov  4 17:22:09 2024';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1608,8 +1566,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '524e05dc77239f3a15dab766aaa59a9e432efde7';
     env.TR_TIME_LOCALTIME = 'Fri Nov  7 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1641,8 +1597,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '524e05dc77239f3a15dab766aaa59a9e432efde7';
     env.TR_TIME_LOCALTIME = 'Fri Nov  7 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1673,8 +1627,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '524e05dc77239f3a15dab766aaa59a9e432efde7';
     env.TR_TIME_LOCALTIME = 'Fri Nov  7 17:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1706,8 +1658,6 @@ describe('torrentdone.ts - All throw errors', () => {
     env.TR_TORRENT_HASH = '540d0ae0eac6cc48e485e54293b19b858db355de';
     env.TR_TIME_LOCALTIME = 'Sat Sep  4 21:22:09 2022';
     env.TR_TORRENT_LABELS = '';
-    env.TR_TORRENT_BYTES_DOWNLOADED = '';
-    env.TR_TORRENT_TRACKERS = '';
     //
     const torrentdone: Torrentdone = new Torrentdone(testRootConfigsPath);
     //
@@ -1737,8 +1687,6 @@ describe('torrentdone.ts - All throw errors', () => {
     expect(torrentdone.TR_TORRENT_HASH).toEqual('540d0ae0eac6cc48e485e54293b19b858db355de');
     expect(torrentdone.TR_TIME_LOCALTIME).toEqual('Sat Sep  4 21:22:09 2022');
     expect(torrentdone.TR_TORRENT_LABELS).toEqual('');
-    expect(torrentdone.TR_TORRENT_BYTES_DOWNLOADED).toEqual(0);
-    expect(torrentdone.TR_TORRENT_TRACKERS).toEqual('');
     //
     await torrentdone.main();
     // log Error
@@ -1749,7 +1697,7 @@ describe('torrentdone.ts - All throw errors', () => {
   });
 });
 
-describe('torrentdone.ts - Second elements', () => {
+describe('torrentdone.ts - Second elements >= 4.0.0 version', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
