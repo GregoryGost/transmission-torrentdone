@@ -112,3 +112,6 @@ __tests__/runner/*
 
 # Test configs
 config.json
+
+# AI
+.agent/
