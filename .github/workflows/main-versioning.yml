@@ -19,11 +19,11 @@ jobs:
     steps:
       - name: Checkout step
         id: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: New tag step
         id: new-main-version
-        uses: GregoryGost/version-tagger@v1.0.5
+        uses: GregoryGost/version-tagger@v1.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'v'
