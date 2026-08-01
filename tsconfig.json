@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "newLine": "lf",
-    "isolatedModules": true
+    "isolatedModules": true,
+    "types": ["node"]
   },
   "exclude": ["./dist", "./node_modules", "./__tests__", "./coverage"]
 }
