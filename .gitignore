@@ -115,3 +115,5 @@ config.json
 
 # AI
 .agent/
+.agents/
+.codex/

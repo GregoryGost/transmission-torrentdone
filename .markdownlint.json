@@ -2,8 +2,15 @@
   "MD004": {
     "style": "dash"
   },
+  "MD013": {
+    "tables": false,
+    "line_length": 120
+  },
+  "MD024": {
+    "siblings_only": true
+  },
   "MD029": {
-    "style": "ordered"
+    "style": "one"
   },
   "MD030": {
     "ul_single": 1,
@@ -11,11 +18,10 @@
     "ol_multi": 1,
     "ul_multi": 1
   },
+  "MD033": {
+    "allowed_elements": ["table", "tr", "td", "img", "p", "i"]
+  },
   "MD046": {
     "style": "fenced"
-  },
-  "MD013": {
-    "tables": false,
-    "line_length": 120
   }
 }
