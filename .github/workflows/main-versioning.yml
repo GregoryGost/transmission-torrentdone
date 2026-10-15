@@ -23,7 +23,7 @@ jobs:
 
       - name: New tag step
         id: new-main-version
-        uses: GregoryGost/version-tagger@v1.1.0
+        uses: GregoryGost/version-tagger@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'v'
