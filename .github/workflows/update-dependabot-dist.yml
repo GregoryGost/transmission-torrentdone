@@ -1,0 +1,128 @@
+# Dependabot updates dependency manifests, but does not regenerate the
+# checked-in dist/index.js bundle. Build without write credentials, then
+# commit only the generated bundle with a short-lived GitHub App token.
+name: Update Dependabot dist
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - package.json
+      - pnpm-lock.yaml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependabot-dist-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: >-
+      github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.compare.outputs.changed }}
+
+    steps:
+      - name: Checkout Dependabot PR
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ^10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build dist
+        run: pnpm run bundle
+
+      - name: Check generated bundle
+        id: compare
+        run: |
+          if [ ! -f dist/index.js ]; then
+            echo "Build did not produce dist/index.js" >&2
+            exit 1
+          fi
+          if git diff --quiet -- dist/index.js; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload regenerated bundle
+        if: steps.compare.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependabot-dist
+          path: dist/index.js
+          if-no-files-found: error
+
+  commit:
+    needs: build
+    if: needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create GitHub App token
+        id: app
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.DIST_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DIST_APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Checkout Dependabot branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app.outputs.token }}
+
+      - name: Verify branch has not changed
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$(git rev-parse HEAD)" != "$EXPECTED_SHA" ]; then
+            echo "Dependabot branch changed during build; refusing to push stale output" >&2
+            exit 1
+          fi
+
+      - name: Download regenerated bundle
+        uses: actions/download-artifact@v8
+        with:
+          name: dependabot-dist
+          path: .generated-dist
+
+      - name: Commit and push dist/index.js
+        env:
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          cp -- .generated-dist/index.js dist/index.js
+
+          if git diff --quiet -- dist/index.js; then
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- dist/index.js
+          git commit -m 'chore: regenerate Dependabot dist [dependabot skip]'
+          git push origin "HEAD:refs/heads/$PR_BRANCH"
