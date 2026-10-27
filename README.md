@@ -219,6 +219,7 @@ chown -R debian-transmission:debian-transmission /opt/torrentdone
 ## Обновление скрипта
 
 Для сборки из ветки `develop` требуется Node.js 26.12.1 или новее в пределах версии 26.x.
+
 Для ветки `main` используйте требования её `package.json`.
 
 ```shell
