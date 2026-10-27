@@ -32,8 +32,10 @@ jobs:
           node-version: '26'
           check-latest: true
           cache: pnpm
-      - name: Resolve and generate lockfile
-        run: pnpm install --no-frozen-lockfile
+      - name: Regenerate single-document pnpm lockfile
+        run: |
+          rm -- pnpm-lock.yaml
+          pnpm install --no-frozen-lockfile
       - name: Build single-file standalone distribution
         run: pnpm run package
       - name: Upload build artifacts
