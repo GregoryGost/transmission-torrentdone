@@ -1,6 +1,8 @@
 allowBuilds:
+  '@parcel/watcher': false
   esbuild: true
   unrs-resolver: true
-onlyBuiltDependencies:
-  - esbuild
-  - unrs-resolver
+
+supportedArchitectures:
+  - current
+  - linux-x64-musl

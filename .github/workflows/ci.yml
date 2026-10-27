@@ -25,7 +25,7 @@ jobs:
         id: setup-pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: ^10
+          version: 12.15.0
 
       - name: Setup Node.js
         id: setup-node
@@ -38,6 +38,16 @@ jobs:
         id: pnpm-install
         run: pnpm i --frozen-lockfile
 
+      - name: Check Peer Dependencies
+        run: pnpm peers check
+
+      - name: Check Dependency Graph Lockfile Compatibility
+        run: |
+          if grep -Eq '^---[[:space:]]*$' pnpm-lock.yaml; then
+            echo 'Multi-document pnpm lockfiles are not yet supported by GitHub Dependency Graph' >&2
+            exit 1
+          fi
+
       - name: Check Format
         id: pnpm-format-check
         run: pnpm run format:check
@@ -45,6 +55,11 @@ jobs:
       - name: Lint
         id: pnpm-lint
         run: pnpm run lint
+
+      - name: TypeScript Typecheck
+        run: |
+          pnpm exec tsc --noEmit -p tsconfig.json
+          pnpm exec tsc --noEmit -p tsconfig.jest.json
 
       - name: Tests
         id: pnpm-ci-test

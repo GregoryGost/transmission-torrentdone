@@ -50,7 +50,7 @@ class Torrentdone {
    */
   private readonly _logger: Logger;
   /**
-   * Connect commant for transmission-remote.
+   * Connect command for transmission-remote.
    * Example: transmission-remote 127.0.0.1:9091 -n login:password
    */
   private readonly _connect: string;

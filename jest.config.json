@@ -16,5 +16,13 @@
   },
   "coverageReporters": ["json-summary", "text", "lcov"],
   "collectCoverage": true,
-  "collectCoverageFrom": ["./src/**"]
+  "collectCoverageFrom": ["./src/**"],
+  "coverageThreshold": {
+    "global": {
+      "branches": 80,
+      "functions": 95,
+      "lines": 95,
+      "statements": 95
+    }
+  }
 }

@@ -4,16 +4,10 @@ import jsLint from '@eslint/js';
 import tsLint from 'typescript-eslint';
 //
 import eslintPluginJest from 'eslint-plugin-jest';
-// @ts-expect-error - eslint-plugin-github does not publish TypeScript declarations.
-import eslintPluginGithub from 'eslint-plugin-github';
+import { importX } from 'eslint-plugin-import-x';
 import eslintPluginJsonc from 'eslint-plugin-jsonc';
 //
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-
-const githubRecommended = eslintPluginGithub.getFlatConfigs().recommended;
-const githubPlugins = { ...githubRecommended.plugins };
-
-delete githubPlugins.prettier;
 
 export default [
   {
@@ -22,24 +16,21 @@ export default [
   },
   jsLint.configs.recommended, // eslint:recommended
   ...tsLint.configs.recommended, // plugin:@typescript-eslint/recommended
-  {
-    ...githubRecommended,
-    plugins: githubPlugins
-  },
+  importX.flatConfigs.recommended,
   eslintPluginJest.configs['flat/recommended'], // plugin:jest/recommended
   ...eslintPluginJsonc.configs['flat/recommended-with-jsonc'],
   eslintPluginPrettierRecommended,
   {
     plugins: {
-      '@typescript-eslint': tsLint.plugin, // @typescript-eslint/plugin
+      '@typescript-eslint': tsLint.plugin,
       jest: eslintPluginJest
     },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      parser: tsLint.parser, // @typescript-eslint/parser
+      parser: tsLint.parser,
       parserOptions: {
-        project: ['./.github/linters/tsconfig.json']
+        project: ['./.github/linters/tsconfig.json', './tsconfig.json']
       },
       globals: {
         ...globals.node,
@@ -52,17 +43,29 @@ export default [
   {
     files: ['__tests__/**/*'],
     rules: {
-      'import/no-namespace': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off'
     }
   },
   {
     rules: {
-      'import/no-unresolved': 'off',
+      // TypeScript already checks module resolution and named imports.
+      'import-x/no-unresolved': 'off',
+      'import-x/named': 'off',
+      'import-x/no-namespace': 'off',
+      'import-x/first': 'error',
+      'import-x/extensions': 'error',
+      'import-x/no-absolute-path': 'error',
+      'import-x/no-amd': 'error',
+      'import-x/no-commonjs': 'error',
+      'import-x/no-duplicates': 'error',
+      'import-x/no-dynamic-require': 'error',
+      'import-x/no-mutable-exports': 'error',
+      'import-x/no-webpack-loader-syntax': 'error',
+      'func-style': ['error', 'declaration', { allowArrowFunctions: true }],
       camelcase: 'off',
-      'i18n-text/no-en': 'off',
-      'import/no-namespace': 'off',
-      'no-console': 'warn',
-      'eslint-comments/no-use': 'off'
+      'no-console': 'warn'
     }
   },
   {

@@ -218,11 +218,13 @@ chown -R debian-transmission:debian-transmission /opt/torrentdone
 
 ## Обновление скрипта
 
-Стоит обновить Node.js если скрипт поддерживает новую версию (отражено в файле `package.json` в репозитории). Как пример
-обновление на 20 LTS версию.
+Для сборки из ветки `develop` требуется Node.js 26.12.1 или новее в пределах версии 26.x.
+
+Для ветки `main` используйте требования её `package.json`.
 
 ```shell
-nvm install 24
+nvm install 26
+node -v
 ```
 
 Для обновления можно просто перекачать файлы `index.js` и `package.json`

@@ -1,0 +1,7 @@
+# actionlint's bundled metadata for create-github-app-token@v3 is outdated.
+# Suppress only the documented app-token client-id input false positives.
+paths:
+  .github/workflows/update-dependabot-dist.yml:
+    ignore:
+      - 'missing input "app-id" which is required by action "actions/create-github-app-token@'
+      - 'input "client-id" is not defined in action "actions/create-github-app-token@'
