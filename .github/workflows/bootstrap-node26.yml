@@ -46,19 +46,14 @@ jobs:
   commit:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Create short-lived GitHub App token
-        id: app
-        uses: actions/create-github-app-token@v3
-        with:
-          client-id: ${{ secrets.DIST_APP_CLIENT_ID }}
-          private-key: ${{ secrets.DIST_APP_PRIVATE_KEY }}
-          permission-contents: write
       - name: Checkout feature branch
         uses: actions/checkout@v7
         with:
           ref: ${{ github.ref_name }}
-          token: ${{ steps.app.outputs.token }}
+          token: ${{ github.token }}
       - name: Guard against concurrent updates
         env:
           SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
