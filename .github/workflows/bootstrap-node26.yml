@@ -1,3 +1,4 @@
+# Rebuild without packageManager metadata.
 # Temporary workflow: regenerate lockfile and bundle for the Node 26 tooling migration.
 name: Bootstrap Node 26 build artifacts
 on:
