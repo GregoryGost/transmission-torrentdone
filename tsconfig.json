@@ -4,14 +4,7 @@
     "outDir": "dist",
     "newLine": "lf",
     "isolatedModules": true,
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "exclude": [
-    "./dist",
-    "./node_modules",
-    "./__tests__",
-    "./coverage"
-  ]
+  "exclude": ["./dist", "./node_modules", "./__tests__", "./coverage"]
 }
