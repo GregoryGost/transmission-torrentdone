@@ -44,22 +44,7 @@ jobs:
 
       - name: Check Dependency Graph Lockfile Compatibility
         run: |
-          if grep -Eq '^---[[:space:]]*        id: pnpm-format-check
-        run: pnpm run format:check
-
-      - name: Lint
-        id: pnpm-lint
-        run: pnpm run lint
-
-      - name: TypeScript Typecheck
-        run: |
-          pnpm exec tsc --noEmit -p tsconfig.json
-          pnpm exec tsc --noEmit -p tsconfig.jest.json
-
-      - name: Tests
-        id: pnpm-ci-test
-        run: pnpm run ci-test
- pnpm-lock.yaml; then
+          if grep -Eq '^---[[:space:]]*$' pnpm-lock.yaml; then
             echo 'Multi-document pnpm lockfiles are not yet supported by GitHub Dependency Graph' >&2
             exit 1
           fi
@@ -71,6 +56,11 @@ jobs:
       - name: Lint
         id: pnpm-lint
         run: pnpm run lint
+
+      - name: TypeScript Typecheck
+        run: |
+          pnpm exec tsc --noEmit -p tsconfig.json
+          pnpm exec tsc --noEmit -p tsconfig.jest.json
 
       - name: Tests
         id: pnpm-ci-test
