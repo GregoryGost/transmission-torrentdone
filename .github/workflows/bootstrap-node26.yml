@@ -1,0 +1,82 @@
+# Temporary workflow: regenerate lockfile and bundle for the Node 26 tooling migration.
+name: Bootstrap Node 26 build artifacts
+on:
+  push:
+    branches:
+      - chore/modernize-node26-ci-20261027
+    paths:
+      - .github/workflows/bootstrap-node26.yml
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ steps.head.outputs.sha }}
+    steps:
+      - name: Checkout without write credentials
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Capture branch HEAD
+        id: head
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12.15.0
+      - name: Setup Node 26
+        uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+          check-latest: true
+          cache: pnpm
+      - name: Resolve and generate lockfile
+        run: pnpm install --no-frozen-lockfile
+      - name: Build single-file standalone distribution
+        run: pnpm run package
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: node26-build
+          path: |
+            pnpm-lock.yaml
+            dist/index.js
+          if-no-files-found: error
+  commit:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create short-lived GitHub App token
+        id: app
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.DIST_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DIST_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - name: Checkout feature branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          token: ${{ steps.app.outputs.token }}
+      - name: Guard against concurrent updates
+        env:
+          SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+      - name: Download generated files
+        uses: actions/download-artifact@v8
+        with:
+          name: node26-build
+          path: .node26-build
+      - name: Commit regenerated lockfile and bundle
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          cp -- .node26-build/pnpm-lock.yaml pnpm-lock.yaml
+          cp -- .node26-build/dist/index.js dist/index.js
+          git add -- pnpm-lock.yaml dist/index.js
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: regenerate Node 26 pnpm 12 lockfile and dist'
+          git push origin "HEAD:refs/heads/$BRANCH"

@@ -1,12 +1,4 @@
-# In TypeScript actions, `dist/` is a special directory. When you reference
-# an action with the `uses:` property, `dist/index.js` is the code that will be
-# run. For this project, the `dist/index.js` file is transpiled from other
-# source files. This workflow ensures the `dist/` directory contains the
-# expected transpiled code.
-#
-# If this workflow is run from a feature branch, it will act as an additional CI
-# check and fail if the checked-in `dist/` directory does not match what is
-# expected from the build.
+# Verify that the checked-in standalone application bundle matches its sources.
 name: Check Transpiled JavaScript
 
 on:
@@ -34,13 +26,14 @@ jobs:
         id: setup-pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: ^10
+          version: 12.15.0
 
       - name: Setup Node.js
         id: setup-node
         uses: actions/setup-node@v7
         with:
-          node-version-file: .node-version
+          node-version: '26'
+          check-latest: true
           cache: pnpm
 
       - name: Install Dependencies

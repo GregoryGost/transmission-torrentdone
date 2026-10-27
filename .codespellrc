@@ -1,0 +1,2 @@
+[codespell]
+skip = pnpm-lock.yaml
