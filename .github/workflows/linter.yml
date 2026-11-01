@@ -44,7 +44,7 @@ jobs:
 
       - name: Lint Codebase
         id: super-linter
-        uses: super-linter/super-linter/slim@v8
+        uses: super-linter/super-linter/slim@v9
         env:
           DEFAULT_BRANCH: develop
           FILTER_REGEX_EXCLUDE: '(^|/)(dist|__tests__|\.codex)/|(^|/)(AGENTS\.md|pnpm-lock\.yaml)$'
